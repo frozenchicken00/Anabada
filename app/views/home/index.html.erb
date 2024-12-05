@@ -1,0 +1,68 @@
+<div class="banner text-center py-5 bg-primary text-white">
+  <div>
+    <h1 class="display-4 fw-bold">Welcome to Anabada</h1>
+    <p class="lead mb-4">Use it sparingly, share, exchange, and reuse.</p>
+    <div class="mt-4">
+      <%= link_to "Browse Products", products_path, class: "btn btn-light btn-lg px-4 me-3" %>
+      <% unless current_user %>
+        <%= link_to "Join Now", sign_up_path, class: "btn btn-outline-light btn-lg px-4" %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- About Section -->
+<div class="container py-5">
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <h2 class="mb-4">About Anabada</h2>
+      <p class="lead">Anabada is a community marketplace that promotes sustainable consumption through sharing and reusing.</p>
+      <p>Our platform connects people who want to buy, sell, or exchange pre-loved items, helping reduce waste and promote environmental consciousness.</p>
+    </div>
+    <div class="col-md-6">
+      <%= image_tag 'Logo.png', alt: 'About Anabada', class: 'img-fluid rounded shadow' %>
+    </div>
+  </div>
+</div>
+
+<div class="bg-light py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Our Values</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="text-center">
+          <i class="bi bi-recycle fs-1 text-primary mb-3"></i>
+          <h3 class="h5">Sustainability</h3>
+          <p class="text-muted">Promoting eco-friendly practices through reuse and recycling</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="text-center">
+          <i class="bi bi-people fs-1 text-primary mb-3"></i>
+          <h3 class="h5">Community</h3>
+          <p class="text-muted">Building connections through sharing and exchange</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="text-center">
+          <i class="bi bi-shield-check fs-1 text-primary mb-3"></i>
+          <h3 class="h5">Trust</h3>
+          <p class="text-muted">Ensuring safe and secure transactions</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="text-center">
+    <h2 class="mb-4">Ready to Join Our Community?</h2>
+    <p class="lead mb-4">Start buying, selling, and exchanging items today!</p>
+    <% if current_user %>
+      <%= link_to "Browse Products", products_path, class: "btn btn-primary btn-lg" %>
+    <% else %>
+      <%= link_to "Sign Up Now", sign_up_path, class: "btn btn-primary btn-lg me-3" %>
+      <%= link_to "Learn More", products_path, class: "btn btn-outline-primary btn-lg" %>
+    <% end %>
+  </div>
+</div>

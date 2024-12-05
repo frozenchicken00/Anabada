@@ -1,0 +1,9 @@
+<div class="container mt-5">
+  <h1 class="mb-4">Reply Comment for <%= @product.name %></h1>
+
+  <%= render 'form', comment: @comment %>
+
+  <div class="mt-4">
+    <%= link_to 'Back to Product', product_path(@product), class: 'btn btn-secondary' %>
+  </div>
+</div>

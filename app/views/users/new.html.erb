@@ -1,0 +1,38 @@
+<div class="d-flex align-items-center py-4" style="min-height: 100vh;">
+  <main class="form-signin w-100 m-auto">
+    <%= form_with(model: @user, url: users_path, local: true, html: { id: "new_profile_form" }) do |form| %>
+      <h1 class="h3 mb-3 fw-normal text-center">Sign up</h1>
+
+      <div class="form-floating mb-3">
+        <%= form.text_field :username, class: "form-control", id: "floatingInput", placeholder: "username" %>
+        <label for="floatingInput">Username</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <%= form.email_field :email, class: "form-control", id: "floatingInput", placeholder: "email" %>
+        <label for="floatingInput">Email</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <%= form.password_field :password, class: "form-control", id: "floatingPassword", placeholder: "password" %>
+        <label for="floatingPassword">Password</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <%= form.password_field :password_confirmation, class: "form-control", id: "floatingPassword", placeholder: "password confirmation" %>
+        <label for="floatingPassword">Password Confirmation</label>
+      </div>
+
+      <%= form.submit "Sign up", class: "btn btn-primary w-100 py-2" %>
+    <% end %>
+
+    <hr class="my-4">
+
+    <%= button_to "/auth/github", class: "btn btn-dark w-100 py-2 d-flex align-items-center justify-content-center fw-bold", data: { turbo: false } do %>
+      <i class="bi bi-github fs-5 me-3"></i>
+      Sign up with GitHub
+    <% end %>
+    <p class="mt-5 mb-3 text-body-secondary text-center">&copy; Anabada 2024</p>
+
+  </main>
+</div>

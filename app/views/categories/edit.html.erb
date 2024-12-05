@@ -1,0 +1,26 @@
+<div class="container mt-5 mx-auto px-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h1>Edit Category</h1>
+      <%= form_with(model: @category, local: true) do |form| %>
+        <% if @category.errors.any? %>
+          <div class="alert alert-danger">
+            <h4><%= pluralize(@category.errors.count, "error") %> prohibited this category from being saved:</h4>
+            <ul>
+              <% @category.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="mb-3">
+          <%= form.label :name, class: "form-label" %>
+          <%= form.text_field :name, class: "form-control" %>
+        </div>
+
+        <%= form.submit "Update Category", class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+</div>

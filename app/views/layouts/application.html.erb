@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Anabada" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+      <div class="container">
+        <%= link_to "Anabada", root_path, class: "navbar-brand fw-bold" %>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <%= link_to "Home", root_path, class: "nav-link" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to "Products", products_path, class: "nav-link" %>
+            </li>
+            <% if admin? %>
+              <li class="nav-item">
+                <%= link_to "Categories", categories_path, class: "nav-link" %>
+              </li>
+            <% end %>
+          </ul>
+
+          <!-- Search bar -->
+          <div class="search-container mx-auto">
+            <%= form_tag products_path, method: :get, class: "d-flex position-relative" do %>
+              <%= text_field_tag :query,
+                  params[:query],
+                  class: "form-control rounded-pill",
+                  placeholder: "Search Anabada",
+                  style: "width: 400px;" %>
+              <button type="submit" class="btn position-absolute end-0 h-100 px-3" style="background: none; border: none;">
+                <i class="bi bi-search"></i>
+              </button>
+            <% end %>
+          </div>
+          
+          <div class="d-flex align-items-center">
+            <% if current_user %>
+              <!-- User Info and Actions -->
+              <div class="d-flex align-items-center gap-2">
+                <span class="text-muted me-2">
+                  <%= current_user.username %>
+                </span>
+                <%= link_to "Profile", user_path(current_user), class: "btn btn-outline-primary btn-sm" %>
+                <%= button_to "Sign Out", sign_out_path, 
+                    method: :delete, 
+                    class: "btn btn-outline-danger btn-sm",
+                    form: { class: "d-inline" } %>
+              </div>
+            <% else %>
+              <%= link_to "Sign In", sign_in_path, class: "btn btn-outline-primary me-2" %>
+              <%= link_to "Sign Up", sign_up_path, class: "btn btn-primary" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <% if notice %>
+    <div class="alert alert-success">
+      <%= notice %>
+    </div>
+    <% end %>
+
+    <% if alert %>
+      <div class="alert alert-danger">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <%= yield %>
+
+    <footer class="bd-footer py-4 py-md-5 mt-5 bg-light">
+      <div class="container py-4 py-md-5 px-4 px-md-3 text-body-secondary">
+        <div class="row">
+          <div class="col-lg-3 mb-3">
+            <a class="d-inline-flex align-items-center mb-2 text-body-emphasis text-decoration-none" href="/" aria-label="Bootstrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+              </svg>
+              &nbsp;
+              &nbsp;
+              <span class="fs-5">Anabada</span>
+            </a>
+            <ul class="list-unstyled small">
+              <li class="mb-2">Use it sparingly, share, exchange, and reuse.</li>
+            </ul>
+          </div>
+          <div class="col-6 col-lg-2 offset-lg-1 mb-3">
+            <h5>Links</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#">Home</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-lg-2 mb-3">
+            <h5>Guides</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#">Getting started</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-lg-2 mb-3">
+            <h5>Products</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" target="_blank" rel="noopener">Bootstrap 5</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-lg-2 mb-3">
+            <h5>Community</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" target="_blank" rel="noopener">Issues</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>

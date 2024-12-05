@@ -1,0 +1,81 @@
+<div class="container mt-5 mx-auto px-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h2>Edit Profile</h2>
+      
+      <%= form_with(model: @user, local: true, html: { id: "edit_profile_form" }) do |form| %>
+        <% if @user.errors.any? %>
+          <div class="alert alert-danger">
+            <h4><%= pluralize(@user.errors.count, "error") %> prohibited this update:</h4>
+            <ul>
+              <% @user.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-floating mb-3">
+          <%= form.text_field :username, class: "form-control", id: "floatingInput", placeholder: "username" %>
+          <label for="floatingInput">Username</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <%= form.email_field :email, class: "form-control", id: "floatingInput", placeholder: "email" %>
+          <label for="floatingInput">Email</label>
+        </div>
+
+        <% if @user.has_password? %>
+          <div class="mb-3">
+            <%= form.label :current_password, class: "form-label"%>
+            <%= form.password_field :current_password, class: "form-control" %>
+            <small class="form-text text-muted">Required to confirm changes</small>
+          </div>
+
+          <div class="mb-3">
+            <%= form.label :password, "New Password", class: "form-label" %>
+            <%= form.password_field :password, class: "form-control" %>
+            <small class="form-text text-muted">Leave blank if you don't want to change it</small>
+          </div>
+
+          <div class="mb-3">
+            <%= form.label :password_confirmation, "Confirm New Password", class: "form-label" %>
+            <%= form.password_field :password_confirmation, class: "form-control" %>
+          </div>
+        <% end %>
+
+        <div class="d-grid gap-2">
+          <%= form.submit "Update Profile", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+
+      <% if @user.has_password? %>
+        <hr class="my-4">
+        <div class="container mt-4">
+          <h5 class="card-title text-danger">Delete Account</h5>
+          <p class="card-text">Once you delete your account, there is no going back. Please be certain.</p>
+          <%= form_with(model: @user, method: :delete, local: true, 
+              html: { id: "delete_account_form" }, 
+              data: { confirm: "Are you sure? This action cannot be undone." }) do |form| %>
+            <div class="mb-3">
+              <%= form.label :current_password, "Enter your password to confirm", class: "form-label" %>
+              <%= form.password_field :current_password, 
+                  class: "form-control",
+                  id: "delete_confirmation_password" %>
+            </div>
+            <%= form.submit "Delete my account", class: "btn btn-danger" %>
+          <% end %>
+        </div>
+      <%else%>
+        <hr class="my-4">
+        <div class="container mt-4">
+          <h5 class="card-title text-danger">Delete Account</h5>
+          <p class="card-text">Once you delete your account, there is no going back. Please be certain.</p>
+          <%= form_with(model: @user, method: :delete, local: true, data: { confirm: "Are you sure? This action cannot be undone." }) do |form| %>
+            <%= form.submit "Delete my account", class: "btn btn-danger" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

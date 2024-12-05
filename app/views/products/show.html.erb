@@ -1,0 +1,139 @@
+<div class="container mt-5">
+  <div class="row">
+    <!-- Main product section -->
+    <div class="col-md-12">
+        <div class="row g-0">
+          <!-- Image Column -->
+          <div class="col-md-6">
+            <% if @product.pictures.attached? %>
+              <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                  <% @product.pictures.each_with_index do |picture, index| %>
+                    <div class="carousel-item <%= 'active' if index == 0 %>">
+                      <%= image_tag picture, class: 'img-fluid rounded-start', 
+                          style: 'width: 100%; height: 500px; object-fit: contain;',
+                          alt: "#{@product.name} Image #{index + 1}" %>
+                    </div>
+                  <% end %>
+                </div>
+                <% if @product.pictures.count > 1 %>
+                  <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                  </button>
+                  <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                  </button>
+                <% end %>
+              </div>
+            <% else %>
+              <%= image_tag 'https://via.placeholder.com/600x500', 
+                  class: 'img-fluid rounded-start',
+                  style: 'width: 100%; height: 500px; object-fit: contain;',
+                  alt: 'Placeholder Image' %>
+            <% end %>
+          </div>
+
+          <!-- Product Details Column -->
+          <div class="col-md-6">
+            <div class="card-body p-5">
+              <h2 class="mb-4"><%= @product.name %></h2>
+              <h4 class="mb-4 text-success">$<%= number_with_precision(@product.price, precision: 2) %></h4>
+              <p class="mb-2"> <strong><%= @product.category.name %></strong></p>
+              <p class="mb-4"><%= @product.description %></p>
+              <p>
+                <small class="text-muted">Posted by <%= @product.user.username %></small>
+              </p>
+              
+              <div class="mt-4">
+                <% if current_user == @product.user %>
+                  <%= link_to "Edit", edit_product_path(@product), class: "btn btn-primary" %>
+                  <%= button_to "Delete", @product, method: :delete, 
+                      class: "btn btn-danger d-inline-block", 
+                      form: { class: 'd-inline-block ms-2' },
+                      data: { turbo_confirm: "Are you sure?" } %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- Comment section -->
+      <div class="comments-section mt-5">
+        <h4>Comments</h4>
+
+        <% if @comments.where(parent_comment_id: nil).any? %>
+          <ul class="comments-list">
+            <% @comments.where(parent_comment_id: nil).each do |comment| %>
+              <li class="comment-item">
+                <strong>Comment:</strong> <%= comment.content %><br>
+                <strong>Helpful Votes:</strong> <%= comment.helpful_vote %>
+                <%= link_to 'Vote Helpful', helpful_vote_product_comment_path(@product, comment), method: :post %> |
+                <%= link_to 'Reply', new_product_comment_path(@product, parent_comment_id: comment.id) %> |
+                <%= link_to 'Edit', edit_product_comment_path(@product, comment) %> 
+                <%= button_to 'Delete', product_comment_path(@product, comment), method: :delete, data: { turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+
+                <!-- Display replies for each comment -->
+                <% if comment.replies.any? %>
+                  <ul class="replies-list">
+                    <% comment.replies.each do |reply| %>
+                      <li class="reply-item"> 
+                        <strong>Reply:</strong> <%= reply.content %><br>
+                        <strong>Helpful Votes:</strong> <%= reply.helpful_vote %>
+                        <%= link_to 'Vote Helpful', helpful_vote_product_comment_path(@product, reply), method: :post %> |
+                        <%= link_to 'Edit', edit_product_comment_path(@product, reply) %> 
+                        <%= button_to 'Delete', product_comment_path(@product, reply), method: :delete, class: 'btn btn-danger' %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p>No comments yet.</p>
+        <% end %>
+      </div>
+
+      <!-- Add new comment form -->
+      <div class="new-comment-form mt-5">
+        <h3>Leave a Comment</h3>
+        <%= render 'comments/form', product: @product, comment: @comment %>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="my-4">
+  
+  <!-- Related Products section -->
+  <div class="related-products mt-5">
+    <h3 class="mb-4">Other Products</h3>
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+      <% Product.where.not(id: @product.id).each do |product| %>
+        <div class="col">
+          <%= link_to product_path(product), class: "text-decoration-none" do %>
+            <div class="card h-100 shadow-sm">
+              <% if product.pictures.attached? %>
+                <%= image_tag product.pictures.first, 
+                    class: 'card-img-top',
+                    style: 'height: 120px; object-fit: cover;',
+                    alt: product.name %>
+              <% else %>
+                <%= image_tag 'https://via.placeholder.com/150', 
+                    class: 'card-img-top',
+                    style: 'height: 120px; object-fit: cover;',
+                    alt: 'Placeholder' %>
+              <% end %>
+              <div class="card-body p-2">
+                <h6 class="card-title text-dark mb-1 text-truncate"><%= product.name %></h6>
+                <p class="card-text text-success mb-0"><small>$<%= number_with_precision(product.price, precision: 2) %></small></p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="container mt-5">
+    <div class="card-body">
+      <h2 class="card-title">Profile</h2>
+      <div class="mb-3">
+        <strong>Username:</strong>
+        <%= @user.username %>
+      </div>
+      <div class="mb-3">
+        <strong>Email:</strong>
+        <%= @user.email %>
+      </div>
+      <div class="mb-3">
+        <strong>Account Type:</strong>
+        <%= @user.admin? ? "Administrator" : "User" %>
+      </div>
+      <%if current_user == @user%>
+        <%= link_to 'Edit Profile', edit_user_path(@user), class: 'btn btn-primary' %>
+        <%= link_to 'Back', root_path, class: 'btn btn-secondary' %>
+      <%end%>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="container py-5">
+  <h2 class="text-center mb-3">Our Products</h2>
+
+  <div class="mb-4">
+    <%= form_tag products_path, method: :get, local: true do %>
+      <div class="row">
+        <div class="col-md-4 offset-md-4">
+          <%= select_tag :category_id, options_from_collection_for_select(Category.all, :id, :name, params[:category_id]), prompt: "Filter by category", class: "form-select", onchange: "this.form.submit();" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if current_user %>
+    <div class="text-center mb-5">
+      <%= link_to "Add New Product", new_product_path, class: "btn btn-primary btn-lg" %>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <% @products.each do |product| %>
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+          <% if product.pictures.attached? %>
+            <%= image_tag product.pictures.first, class: 'card-img-top product-img', alt: product.name %>
+          <% else %>
+            <%= image_tag 'https://via.placeholder.com/300x200', class: 'card-img-top product-img', alt: 'Placeholder' %>
+          <% end %>
+          <div class="card-body">
+            <h5 class="card-title"><%= product.name %></h5>
+            <p class="card-text text-muted"><%= truncate(product.description, length: 100) %></p>
+            <p class="card-text text-muted"> <strong><%= product.category.name %></strong></p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="h5 mb-0">$<%= product.price %></span>
+              <%= link_to "View Details", product_path(product), class: "btn btn-outline-primary" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

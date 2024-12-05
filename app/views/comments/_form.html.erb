@@ -1,0 +1,10 @@
+<%= form_with(model: [@product, @comment], local: true) do |form| %>
+  <% if @parent_comment %>
+    <%= form.hidden_field :parent_comment_id, value: @parent_comment.id %>
+  <% end %>
+  <div class="form-group mb-3">
+    <%= form.label :content %>
+    <%= form.text_area :content, class: "form-control" %>
+  </div>
+  <%= form.submit 'Submit', class: 'btn btn-primary' %>
+<% end %>

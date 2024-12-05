@@ -1,0 +1,32 @@
+<div class="container mt-5 mx-auto px-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h1>Categories</h1>
+      <% if @categories.any? %>
+        <ul class="list-group">
+          <% @categories.each do |category| %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><%= category.name %></span>
+              <% if admin? %>
+                <div>
+                  <%= link_to 'Edit', edit_category_path(category), class: "btn btn-sm btn-primary" %>
+                  <%= button_to 'Delete', category_path(category), 
+                      method: :delete, 
+                      class: "btn btn-sm btn-danger d-inline-block",
+                      form: { class: 'd-inline-block ms-2' },
+                      data: { turbo_confirm: "Are you sure?" } %>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p>No categories available.</p>
+      <% end %>
+
+      <% if admin? %>
+        <%= link_to 'New Category', new_category_path, class: "btn btn-success mt-3" %>
+      <% end %>
+    </div>
+  </div>
+</div>
