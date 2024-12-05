@@ -55,44 +55,50 @@ Anabada is a community-driven marketplace that promotes sustainable consumption 
 - BCrypt for password hashing
 - OmniAuth for GitHub integration
 
-## Getting Started
+</br>
+</br>
+
+# Getting Started
+
+### Dev Container Setup
+This project uses Dev Containers, allowing you to develop inside a Docker container with a consistent, pre-configured development environment.
 
 ### Prerequisites
-- Ruby 3.3.4
-- PostgreSQL
-- Node.js
-- Yarn
-- Elasticsearch
+- Docker Desktop
+- Visual Studio Code
+- VS Code Remote - Containers extension
+- Git
+
+
 
 ### Installation
 1. Clone the repository
-```bash
-git clone https://github.com/frozenchicken00/Anabada.git
-cd anabada
-```
+    ```bash
+    git clone https://github.com/frozenchicken00/Anabada.git
+    cd anabada
+    ```
 
 2. Install dependencies
-```bash
-bundle install
-yarn install
-```
+    ```bash
+    bundle install
+    yarn install
+    ```
 
 
 3. Setup database
-```bash
-rails db:create
-rails db:migrate
-rails db:seed
-```
+    ```bash
+    rails db:create
+    rails db:migrate
+    rails db:seed
+    ```
 
 4. Start the server
-```bash
-bin/dev
+    ```bash
+    bin/dev
 
-#Visit http://localhost:3000
-```
+    # Visit http://localhost:3000
+    ```
 
 ## Testing
-```bash
-guard
-```
+    guard
+
