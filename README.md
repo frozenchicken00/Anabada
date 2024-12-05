@@ -67,22 +67,32 @@ Anabada is a community-driven marketplace that promotes sustainable consumption 
 ### Installation
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/anabada.git
+git clone https://github.com/frozenchicken00/Anabada.git
 cd anabada
+```
 
 2. Install dependencies
+```bash
 bundle install
 yarn install
+```
+
 
 3. Setup database
+```bash
 rails db:create
 rails db:migrate
 rails db:seed
+```
 
 4. Start the server
+```bash
 bin/dev
 
-Visit http://localhost:3000
+#Visit http://localhost:3000
+```
 
-## Running Test
+## Testing
+```bash
 guard
+```
