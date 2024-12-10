@@ -70,7 +70,6 @@ This project uses Dev Containers, allowing you to develop inside a Docker contai
 - Git
 
 
-
 ### Installation
 1. Clone the repository
     ```bash
@@ -84,15 +83,25 @@ This project uses Dev Containers, allowing you to develop inside a Docker contai
     yarn install
     ```
 
-
 3. Setup database
     ```bash
-    rails db:create
-    rails db:migrate
-    rails db:seed
+    bin/rails db:create
+    bin/rails db:migrate
+    bin/rails db:seed
+    bin/rails db:reset
+    ```
+    
+4. Add a credential
+    ```bash
+    EDITOR=your_texteditor bin/rails credentials:edit
+    
+    # Add github OAuth
+    github:
+      client_id:
+      secret:
     ```
 
-4. Start the server
+5. Start the server
     ```bash
     bin/dev
 
