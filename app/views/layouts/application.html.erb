@@ -27,7 +27,7 @@
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
+          <ul class="navbar-nav">
             <li class="nav-item">
               <%= link_to "Home", root_path, class: "nav-link" %>
             </li>
@@ -42,13 +42,12 @@
           </ul>
 
           <!-- Search bar -->
-          <div class="search-container mx-auto">
-            <%= form_tag products_path, method: :get, class: "d-flex position-relative" do %>
+          <div class="search-container mx-auto flex-grow-1 d-flex justify-content-center">
+            <%= form_tag products_path, method: :get, class: "d-flex position-relative", style: "width: 400px;" do %>
               <%= text_field_tag :query,
                   params[:query],
-                  class: "form-control rounded-pill",
-                  placeholder: "Search Anabada",
-                  style: "width: 400px;" %>
+                  class: "form-control rounded-pill w-100",
+                  placeholder: "Search Anabada" %>
               <button type="submit" class="btn position-absolute end-0 h-100 px-3" style="background: none; border: none;">
                 <i class="bi bi-search"></i>
               </button>
