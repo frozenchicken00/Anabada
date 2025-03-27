@@ -1,10 +1,37 @@
-<%= form_with(model: [@product, @comment], local: true) do |form| %>
+<%= form_with(model: [@product, @comment], local: true, class: "comment-form", data: { controller: "comment" }) do |form| %>
   <% if @parent_comment %>
     <%= form.hidden_field :parent_comment_id, value: @parent_comment.id %>
   <% end %>
-  <div class="form-group mb-3">
-    <%= form.label :content %>
-    <%= form.text_area :content, class: "form-control" %>
+  
+  <div class="comment-input-container bg-light rounded p-3 mb-3">
+    <%= form.text_area :content, class: "form-control border-0 bg-light", placeholder: "Add comment...", rows: 3, data: { comment_target: "textarea" } %>
+    
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <div class="formatting-tools" data-comment-target="formattingTools">
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Bold" data-format="bold" data-action="click->comment#applyFormatting">
+          <i class="bi bi-type-bold"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Italic" data-format="italic" data-action="click->comment#applyFormatting">
+          <i class="bi bi-type-italic"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Underline" data-format="underline" data-action="click->comment#applyFormatting">
+          <i class="bi bi-type-underline"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Link" data-format="link" data-action="click->comment#applyFormatting">
+          <i class="bi bi-link-45deg"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Image">
+          <i class="bi bi-image"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Emoji">
+          <i class="bi bi-emoji-smile"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-link text-dark" title="Mention">
+          <i class="bi bi-at"></i>
+        </button>
+      </div>
+      
+      <%= form.submit 'Submit', class: 'btn btn-primary rounded-pill px-4', data: { comment_target: "submitButton" } %>
+    </div>
   </div>
-  <%= form.submit 'Submit', class: 'btn btn-primary' %>
 <% end %>

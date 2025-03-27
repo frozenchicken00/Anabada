@@ -1,0 +1,29 @@
+<div class="message <%= is_current_user ? 'message-sent' : 'message-received' %> <%= message.read ? 'read' : 'unread' %>" 
+     data-message-id="<%= message.id %>">
+  <% if !is_current_user %>
+    <div class="message-avatar">
+      <% user_initial = message.user&.username&.first&.upcase || 'A' %>
+      <div class="avatar-circle avatar-sm bg-info text-white">
+        <%= user_initial %>
+      </div>
+    </div>
+  <% end %>
+  
+  <div class="message-content">
+    <div class="message-bubble">
+      <%= message.body %>
+    </div>
+    <div class="message-info">
+      <span class="message-time"><%= message.created_at.strftime("%H:%M") %></span>
+      <% if is_current_user %>
+        <span class="message-status">
+          <% if message.read %>
+            <i class="bi bi-check2-all" title="Read"></i>
+          <% else %>
+            <i class="bi bi-check2" title="Sent"></i>
+          <% end %>
+        </span>
+      <% end %>
+    </div>
+  </div>
+</div> 

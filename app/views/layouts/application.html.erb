@@ -62,10 +62,6 @@
                   <%= current_user.username %>
                 </span>
                 <%= link_to "Profile", user_path(current_user), class: "btn btn-outline-primary btn-sm" %>
-                <%= button_to "Sign Out", sign_out_path, 
-                    method: :delete, 
-                    class: "btn btn-outline-danger btn-sm",
-                    form: { class: "d-inline" } %>
               </div>
             <% else %>
               <%= link_to "Sign In", sign_in_path, class: "btn btn-outline-primary me-2" %>

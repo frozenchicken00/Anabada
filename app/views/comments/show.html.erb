@@ -1,10 +1,55 @@
-<!-- app/views/comments/show.html.erb 
-
-<p><strong>Title:</strong> <%= @comment.title %></p>
-<p><strong>Content:</strong> <%= @comment.content %></p>
-
-<%= link_to 'Edit', edit_product_comment_path(@product, @comment), class: 'btn btn-warning' %>
-<%= link_to 'Delete', [@product, @comment], method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
-<%= link_to 'Back to Product', product_path(@product), class: 'btn btn-secondary' %>
-
--->
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h2>Comment Details</h2>
+    </div>
+    <div class="card-body">
+      <% if @comment %>
+        <div class="d-flex mb-3">
+          <div class="comment-avatar me-3">
+            <% user_initial = @comment.user&.username&.first&.upcase || 'A' %>
+            <div class="avatar-circle bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+              <%= user_initial %>
+            </div>
+          </div>
+          <div>
+            <h5><%= @comment.user&.username || "Anonymous" %></h5>
+            <small class="text-muted"><%= time_ago_in_words(@comment.created_at) %> ago</small>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <h6>Content:</h6>
+          <p class="p-3 bg-light rounded"><%= @comment.content %></p>
+        </div>
+        
+        <div class="mb-3">
+          <h6>Helpful Votes:</h6>
+          <p><span class="badge bg-primary"><%= @comment.helpful_vote %></span></p>
+        </div>
+        
+        <% if @comment.parent_comment %>
+          <div class="mb-3">
+            <h6>In Reply To:</h6>
+            <p class="p-2 bg-light rounded"><%= @comment.parent_comment.content %></p>
+          </div>
+        <% end %>
+        
+        <div class="mb-3">
+          <h6>Product:</h6>
+          <p><%= link_to @comment.product.name, @comment.product %></p>
+        </div>
+        
+        <div class="mt-4">
+          <%= link_to 'Edit', edit_product_comment_path(@comment.product, @comment), class: 'btn btn-warning' %>
+          <%= link_to 'Back to Product', @comment.product, class: 'btn btn-secondary ms-2' %>
+        </div>
+      <% else %>
+        <div class="alert alert-warning">
+          Comment not found.
+        </div>
+        <%= link_to 'Back', products_path, class: 'btn btn-secondary' %>
+      <% end %>
+    </div>
+  </div>
+</div>

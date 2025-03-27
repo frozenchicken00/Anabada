@@ -43,7 +43,7 @@
               <p class="mb-2"> <strong><%= @product.category.name %></strong></p>
               <p class="mb-4"><%= @product.description %></p>
               <p>
-                <small class="text-muted">Posted by <%= @product.user.username %></small>
+                <small class="text-muted">Posted by <%= link_to @product.user.username, user_path(@product.user) %></small>
               </p>
               
               <div class="mt-4">
@@ -53,6 +53,10 @@
                       class: "btn btn-danger d-inline-block", 
                       form: { class: 'd-inline-block ms-2' },
                       data: { turbo_confirm: "Are you sure?" } %>
+                <% elsif current_user %>
+                  <%= link_to conversations_path(receiver_id: @product.user.id), method: :post, class: "btn btn-primary chat-btn" do %>
+                    <i class="bi bi-chat-dots me-1"></i> Chat with <%= @product.user.username %>
+                  <% end %>
                 <% end %>
               </div>
             </div>
@@ -60,46 +64,262 @@
         </div>
 
       <!-- Comment section -->
-      <div class="comments-section mt-5">
-        <h4>Comments</h4>
+      <div class="comments-section mt-5" data-controller="comment">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="m-0">Comments <span class="badge bg-secondary rounded-pill ms-2"><%= @comments.count %></span></h4>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="sortDropdownMenu">
+              <i class="bi bi-arrow-down-up me-1"></i> Most recent
+            </button>
+            <ul class="dropdown-menu" id="sortDropdownMenu" aria-labelledby="sortDropdown">
+              <li><a class="dropdown-item active" href="#" data-comment-target="sortOption" data-sort-type="recent" data-action="click->comment#sortComments">Most recent</a></li>
+              <li><a class="dropdown-item" href="#" data-comment-target="sortOption" data-sort-type="helpful" data-action="click->comment#sortComments">Most helpful</a></li>
+              <li><a class="dropdown-item" href="#" data-comment-target="sortOption" data-sort-type="oldest" data-action="click->comment#sortComments">Oldest first</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Add new comment form -->
+        <div class="new-comment-form mb-4">
+          <%= render 'comments/form', product: @product, comment: @comment %>
+        </div>
 
         <% if @comments.where(parent_comment_id: nil).any? %>
-          <ul class="comments-list">
+          <div class="comments-list" data-comment-target="commentsList">
             <% @comments.where(parent_comment_id: nil).each do |comment| %>
-              <li class="comment-item">
-                <strong>Comment:</strong> <%= comment.content %><br>
-                <strong>Helpful Votes:</strong> <%= comment.helpful_vote %>
-                <%= link_to 'Vote Helpful', helpful_vote_product_comment_path(@product, comment), method: :post %> |
-                <%= link_to 'Reply', new_product_comment_path(@product, parent_comment_id: comment.id) %> |
-                <%= link_to 'Edit', edit_product_comment_path(@product, comment) %> 
-                <%= button_to 'Delete', product_comment_path(@product, comment), method: :delete, data: { turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
-
-                <!-- Display replies for each comment -->
-                <% if comment.replies.any? %>
-                  <ul class="replies-list">
-                    <% comment.replies.each do |reply| %>
-                      <li class="reply-item"> 
-                        <strong>Reply:</strong> <%= reply.content %><br>
-                        <strong>Helpful Votes:</strong> <%= reply.helpful_vote %>
-                        <%= link_to 'Vote Helpful', helpful_vote_product_comment_path(@product, reply), method: :post %> |
-                        <%= link_to 'Edit', edit_product_comment_path(@product, reply) %> 
-                        <%= button_to 'Delete', product_comment_path(@product, reply), method: :delete, class: 'btn btn-danger' %>
-                      </li>
+              <div class="comment-card mb-4">
+                <div class="d-flex">
+                  <div class="comment-avatar me-3">
+                    <% user_initial = comment.user&.username&.first&.upcase || 'A' %>
+                    <div class="avatar-circle bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+                      <%= user_initial %>
+                    </div>
+                  </div>
+                  <div class="comment-content flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div>
+                        <h6 class="mb-0 fw-bold"><%= comment.user&.username || "Anonymous" %></h6>
+                        <small class="text-muted"><%= time_ago_in_words(comment.created_at) %> ago</small>
+                      </div>
+                      <div class="dropdown">
+                        <button class="btn btn-sm btn-link text-dark" type="button" id="commentOptions<%= comment.id %>" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="commentOptionsMenu<%= comment.id %>">
+                          <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" id="commentOptionsMenu<%= comment.id %>" aria-labelledby="commentOptions<%= comment.id %>">
+                          <% if current_user && current_user == comment.user %>
+                            <li><%= link_to 'Edit', edit_product_comment_path(@product, comment), class: 'dropdown-item' %></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><%= link_to 'Delete', product_comment_path(@product, comment), 
+                                   data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, 
+                                   class: 'dropdown-item text-danger' %></li>
+                          <% else %>
+                            <li><span class="dropdown-item text-muted">Report</span></li>
+                          <% end %>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <p class="mb-2"><%= comment.content %></p>
+                    
+                    <div class="comment-actions d-flex align-items-center">
+                      <div class="me-3">
+                        <%= link_to helpful_vote_product_comment_path(@product, comment), 
+                            class: "btn btn-sm btn-link text-decoration-none #{comment.voted_by?(current_user) ? 'text-primary' : 'text-dark'}", 
+                            data: { 
+                              turbo: false, 
+                              action: "click->comment#vote",
+                              comment_target: "voteButton"
+                            } do %>
+                          <i class="bi <%= comment.voted_by?(current_user) ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up' %> me-1"></i> <span class="vote-count"><%= comment.helpful_vote %></span>
+                        <% end %>
+                      </div>
+                      <button class="btn btn-sm btn-link text-dark text-decoration-none" 
+                              data-reply-form="reply-form-<%= comment.id %>" 
+                              data-action="click->comment#toggleReplyForm">
+                        <i class="bi bi-reply me-1"></i> Reply
+                      </button>
+                    </div>
+                    
+                    <!-- Inline reply form, hidden by default -->
+                    <div id="reply-form-<%= comment.id %>" class="reply-form-container mt-3 d-none">
+                      <%= form_with(model: [@product, Comment.new(parent_comment_id: comment.id)], local: true, class: "reply-form") do |form| %>
+                        <%= form.hidden_field :parent_comment_id, value: comment.id %>
+                        <div class="input-group">
+                          <%= form.text_area :content, class: "form-control", placeholder: "Write a reply...", rows: 2 %>
+                          <div class="input-group-append">
+                            <%= form.submit 'Reply', class: 'btn btn-primary' %>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                    
+                    <!-- Display replies -->
+                    <% if comment.replies.any? %>
+                      <div class="replies-container mt-3 ms-4 border-start ps-3">
+                        <% if comment.replies.count > 2 %>
+                          <div class="mb-3">
+                            <button class="btn btn-sm btn-link text-primary collapsed" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#repliesCollapse<%= comment.id %>" 
+                                    aria-expanded="false"
+                                    aria-controls="repliesCollapse<%= comment.id %>">
+                              <span class="when-collapsed">Show replies (<%= comment.replies.count %>)</span>
+                              <span class="when-not-collapsed">Hide replies</span>
+                            </button>
+                          </div>
+                          <div class="collapse" id="repliesCollapse<%= comment.id %>">
+                        <% end %>
+                        
+                        <% comment.replies.each do |reply| %>
+                          <div class="reply-card mb-3">
+                            <div class="d-flex">
+                              <div class="reply-avatar me-3">
+                                <% reply_user_initial = reply.user&.username&.first&.upcase || 'A' %>
+                                <div class="avatar-circle avatar-sm bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+                                  <%= reply_user_initial %>
+                                </div>
+                              </div>
+                              <div class="reply-content flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <div>
+                                    <h6 class="mb-0 fw-bold"><%= reply.user&.username || "Anonymous" %></h6>
+                                    <small class="text-muted"><%= time_ago_in_words(reply.created_at) %> ago</small>
+                                  </div>
+                                  <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-dark" type="button" id="replyOptions<%= reply.id %>" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="replyOptionsMenu<%= reply.id %>">
+                                      <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" id="replyOptionsMenu<%= reply.id %>" aria-labelledby="replyOptions<%= reply.id %>">
+                                      <% if current_user && current_user == reply.user %>
+                                        <li><%= link_to 'Edit', edit_product_comment_path(@product, reply), class: 'dropdown-item' %></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><%= link_to 'Delete', product_comment_path(@product, reply), 
+                                               data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, 
+                                               class: 'dropdown-item text-danger' %></li>
+                                      <% else %>
+                                        <li><span class="dropdown-item text-muted">Report</span></li>
+                                      <% end %>
+                                    </ul>
+                                  </div>
+                                </div>
+                                
+                                <p class="mb-2"><%= reply.content %></p>
+                                
+                                <div class="reply-actions d-flex">
+                                  <%= link_to helpful_vote_product_comment_path(@product, reply), 
+                                      class: "btn btn-sm btn-link text-decoration-none #{reply.voted_by?(current_user) ? 'text-primary' : 'text-dark'}", 
+                                      data: { 
+                                        turbo: false, 
+                                        action: "click->comment#vote",
+                                        comment_target: "voteButton"
+                                      } do %>
+                                    <i class="bi <%= reply.voted_by?(current_user) ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up' %> me-1"></i> <span class="vote-count"><%= reply.helpful_vote %></span>
+                                  <% end %>
+                                  
+                                  <button class="btn btn-sm btn-link text-dark text-decoration-none"
+                                          data-reply-form="nested-reply-form-<%= reply.id %>"
+                                          data-action="click->comment#toggleReplyForm">
+                                    <i class="bi bi-reply me-1"></i> Reply
+                                  </button>
+                                </div>
+                                
+                                <!-- Nested reply form -->
+                                <div id="nested-reply-form-<%= reply.id %>" class="nested-reply-form mt-2 d-none">
+                                  <%= form_with(model: [@product, Comment.new(parent_comment_id: reply.id)], local: true, class: "nested-reply-form") do |form| %>
+                                    <%= form.hidden_field :parent_comment_id, value: reply.id %>
+                                    <div class="input-group">
+                                      <%= form.text_area :content, class: "form-control", placeholder: "Write a reply...", rows: 2 %>
+                                      <div class="input-group-append">
+                                        <%= form.submit 'Reply', class: 'btn btn-primary' %>
+                                      </div>
+                                    </div>
+                                  <% end %>
+                                </div>
+                                
+                                <!-- Display nested replies -->
+                                <% nested_replies = Comment.where(parent_comment_id: reply.id) %>
+                                <% if nested_replies.any? %>
+                                  <div class="nested-replies-container mt-2 ms-3 border-start ps-3">
+                                    <% if nested_replies.count > 2 %>
+                                      <div class="mb-2">
+                                        <button class="btn btn-sm btn-link text-primary collapsed" 
+                                                type="button" 
+                                                data-bs-toggle="collapse" 
+                                                data-bs-target="#nestedRepliesCollapse<%= reply.id %>" 
+                                                aria-expanded="false"
+                                                aria-controls="nestedRepliesCollapse<%= reply.id %>">
+                                          <span class="when-collapsed">Show more replies (<%= nested_replies.count %>)</span>
+                                          <span class="when-not-collapsed">Hide replies</span>
+                                        </button>
+                                      </div>
+                                      <div class="collapse" id="nestedRepliesCollapse<%= reply.id %>">
+                                    <% end %>
+                                    
+                                    <% nested_replies.each do |nested_reply| %>
+                                      <div class="nested-reply-card mb-2">
+                                        <div class="d-flex">
+                                          <div class="reply-avatar me-2">
+                                            <% nested_user_initial = nested_reply.user&.username&.first&.upcase || 'A' %>
+                                            <div class="avatar-circle avatar-xs bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+                                              <%= nested_user_initial %>
+                                            </div>
+                                          </div>
+                                          <div class="nested-reply-content flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                              <div>
+                                                <h6 class="mb-0 fw-bold fs-6"><%= nested_reply.user&.username || "Anonymous" %></h6>
+                                                <small class="text-muted"><%= time_ago_in_words(nested_reply.created_at) %> ago</small>
+                                              </div>
+                                            </div>
+                                            <p class="mb-1 small"><%= nested_reply.content %></p>
+                                            <div class="nested-reply-actions">
+                                              <%= link_to helpful_vote_product_comment_path(@product, nested_reply), 
+                                                  class: "btn btn-sm btn-link text-decoration-none #{nested_reply.voted_by?(current_user) ? 'text-primary' : 'text-dark'}", 
+                                                  data: { 
+                                                    turbo: false, 
+                                                    action: "click->comment#vote",
+                                                    comment_target: "voteButton"
+                                                  } do %>
+                                                <i class="bi <%= nested_reply.voted_by?(current_user) ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up' %> me-1"></i> <span class="vote-count"><%= nested_reply.helpful_vote %></span>
+                                              <% end %>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    <% end %>
+                                    
+                                    <% if nested_replies.count > 2 %>
+                                      </div>
+                                    <% end %>
+                                  </div>
+                                <% end %>
+                              </div>
+                            </div>
+                          </div>
+                        <% end %>
+                        
+                        <% if comment.replies.count > 2 %>
+                          </div>
+                        <% end %>
+                      </div>
                     <% end %>
-                  </ul>
-                <% end %>
-              </li>
+                  </div>
+                </div>
+              </div>
             <% end %>
-          </ul>
+            
+            <div class="text-center mt-4">
+              <button class="btn btn-outline-secondary rounded-pill px-4" data-action="click->comment#showMoreComments">
+                <i class="bi bi-arrow-down-circle me-2"></i> Show more
+              </button>
+            </div>
+          </div>
         <% else %>
-          <p>No comments yet.</p>
+          <div class="text-center py-4 bg-light rounded">
+            <p class="text-muted mb-0">No comments yet. Be the first to comment!</p>
+          </div>
         <% end %>
-      </div>
-
-      <!-- Add new comment form -->
-      <div class="new-comment-form mt-5">
-        <h3>Leave a Comment</h3>
-        <%= render 'comments/form', product: @product, comment: @comment %>
       </div>
 
     </div>

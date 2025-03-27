@@ -1,0 +1,187 @@
+<div class="container mt-4">
+  <div class="row">
+    <!-- Left sidebar (conversations list) -->
+    <div class="col-md-4 d-none d-md-block">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Conversations</h5>
+          <%= link_to conversations_path, class: "btn btn-outline-primary btn-sm" do %>
+            <i class="bi bi-plus"></i> New
+          <% end %>
+        </div>
+        <div class="list-group list-group-flush conversations-list">
+          <% current_user.conversations.includes(:sender, :receiver).each do |conversation| %>
+            <% other_user = conversation.other_user(current_user) %>
+            <% last_message = conversation.last_message %>
+            
+            <%= link_to conversation_path(conversation), class: "list-group-item list-group-item-action #{'active' if conversation.id == @conversation.id} #{'unread' if conversation.unread_messages_for?(current_user)}" do %>
+              <div class="d-flex">
+                <div class="conversation-avatar me-3">
+                  <% user_initial = other_user&.username&.first&.upcase || 'A' %>
+                  <div class="avatar-circle bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+                    <%= user_initial %>
+                  </div>
+                </div>
+                <div class="conversation-content flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <h6 class="mb-0"><%= other_user.username %></h6>
+                    <small class="text-muted">
+                      <%= last_message ? time_ago_in_words(last_message.created_at) + " ago" : "New" %>
+                    </small>
+                  </div>
+                  <p class="mb-0 text-truncate small">
+                    <% if last_message %>
+                      <%= truncate(last_message.body, length: 30) %>
+                    <% else %>
+                      <span class="text-muted">No messages yet</span>
+                    <% end %>
+                  </p>
+                  
+                  <% if conversation.unread_messages_for?(current_user) %>
+                    <span class="badge bg-primary rounded-pill unread-count">
+                      <%= conversation.unread_count_for(current_user) %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right side (conversation) -->
+    <div class="col-md-8">
+      <div class="card conversation-container">
+        <!-- Header -->
+        <div class="card-header conversation-header">
+          <div class="d-flex align-items-center">
+            <%= link_to conversations_path, class: "btn btn-link text-dark d-md-none me-2" do %>
+              <i class="bi bi-arrow-left"></i>
+            <% end %>
+            
+            <div class="conversation-avatar me-3">
+              <% user_initial = @other_user&.username&.first&.upcase || 'A' %>
+              <div class="avatar-circle bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+                <%= user_initial %>
+              </div>
+            </div>
+            
+            <div>
+              <h5 class="mb-0"><%= @other_user.username %></h5>
+              <small id="connection-status" class="connection-indicator offline" title="Offline">
+                Offline
+              </small>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Messages container -->
+        <div class="card-body conversation-body" id="messages">
+          <% if @messages.any? %>
+            <!-- Day separator -->
+            <% current_date = nil %>
+            <% @messages.each do |message| %>
+              <% message_date = message.created_at.to_date %>
+              
+              <% if current_date != message_date %>
+                <div class="date-separator my-3">
+                  <span>
+                    <% if message_date == Date.today %>
+                      Today
+                    <% elsif message_date == Date.yesterday %>
+                      Yesterday
+                    <% else %>
+                      <%= message_date.strftime("%B %d, %Y") %>
+                    <% end %>
+                  </span>
+                </div>
+                <% current_date = message_date %>
+              <% end %>
+              
+              <%= render partial: 'messages/message', locals: { 
+                message: message, 
+                is_current_user: message.user_id == current_user.id
+              } %>
+            <% end %>
+          <% else %>
+            <div class="text-center py-5">
+              <p class="text-muted">No messages yet</p>
+              <small>Start the conversation by sending a message below</small>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Message input -->
+        <div class="card-footer conversation-footer">
+          <%= form_with(model: [@conversation, @message], 
+                        id: 'message-form', 
+                        data: { remote: false }, 
+                        class: "message-form") do |form| %>
+            <div class="input-group">
+              <%= form.text_area :body, 
+                  rows: 1, 
+                  class: "form-control", 
+                  placeholder: "Type a message...",
+                  id: "message-input" %>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send"></i>
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sound for new messages -->
+<audio id="message-sound" preload="auto">
+  <source src="/message.mp3" type="audio/mpeg">
+</audio>
+
+<%= content_for :head do %>
+  <meta name="current-user-id" content="<%= current_user.id %>">
+<% end %>
+
+<%= javascript_tag do %>
+  document.addEventListener("turbo:load", function() {
+    // Scroll to bottom
+    const messages = document.getElementById('messages');
+    if (messages) {
+      messages.scrollTop = messages.scrollHeight;
+    }
+    
+    // Initialize ActionCable
+    const conversationId = "<%= @conversation.id %>";
+    let conversation;
+    
+    import("/channels/conversation_channel.js")
+      .then(module => {
+        const createConversationChannel = module.default;
+        conversation = createConversationChannel(conversationId);
+        
+        // Message form handling
+        const form = document.getElementById('message-form');
+        const input = document.getElementById('message-input');
+        
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = input.value.trim();
+            if (message) {
+              conversation.sendMessage(message);
+              input.value = '';
+              input.focus();
+            }
+          });
+          
+          // Auto-resize textarea
+          input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+          });
+        }
+      });
+  });
+<% end %>

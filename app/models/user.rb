@@ -1,9 +1,17 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :products, dependent: :destroy
+  has_many :comments, dependent: :nullify
+  has_many :votes, dependent: :destroy
+
+  # Messaging associations
+  has_many :messages
+  has_many :sent_conversations, class_name: "Conversation", foreign_key: "sender_id"
+  has_many :received_conversations, class_name: "Conversation", foreign_key: "receiver_id"
 
   validates :username, presence: true, uniqueness: true
   validates :email, format: { with: /@/, message: "should look like an email address" }, uniqueness: true, allow_blank: true
+
   def self.new_from_hash(user_hash)
     user = User.new user_hash
     user.password_digest = 0
@@ -12,5 +20,28 @@ class User < ApplicationRecord
 
   def has_password?
     self.password_digest.nil? || self.password_digest != "0"
+  end
+
+  # Get all conversations this user is involved in
+  def conversations
+    Conversation.involving(self.id)
+  end
+
+  # Check if user has unread messages
+  def has_unread_messages?
+    Message.joins(:conversation)
+          .where("conversations.sender_id = ? OR conversations.receiver_id = ?", id, id)
+          .where.not(user_id: id)
+          .where(read: false)
+          .exists?
+  end
+
+  # Count total unread messages
+  def unread_messages_count
+    Message.joins(:conversation)
+          .where("conversations.sender_id = ? OR conversations.receiver_id = ?", id, id)
+          .where.not(user_id: id)
+          .where(read: false)
+          .count
   end
 end

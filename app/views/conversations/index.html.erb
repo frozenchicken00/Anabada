@@ -1,0 +1,95 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Start a new conversation</h5>
+        </div>
+        <div class="card-body">
+          <%= form_with(url: conversations_path, method: :post, local: true) do |f| %>
+            <div class="mb-3">
+              <%= f.label :receiver_id, "Select User", class: "form-label" %>
+              <%= f.select :receiver_id, 
+                  User.where.not(id: current_user.id).pluck(:username, :id), 
+                  { include_blank: "Select a user..." }, 
+                  { class: "form-select" } %>
+            </div>
+            <%= f.submit "Start Conversation", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Your Conversations</h5>
+        </div>
+        <div class="list-group list-group-flush conversations-list">
+          <% if @conversations.any? %>
+            <% @conversations.each do |conversation| %>
+              <% other_user = conversation.other_user(current_user) %>
+              <% last_message = conversation.last_message %>
+              
+              <%= link_to conversation_path(conversation), class: "list-group-item list-group-item-action #{'active' if false} #{'unread' if conversation.unread_messages_for?(current_user)}" do %>
+                <div class="d-flex">
+                  <div class="conversation-avatar me-3">
+                    <% user_initial = other_user&.username&.first&.upcase || 'A' %>
+                    <div class="avatar-circle bg-<%= ['primary', 'success', 'info', 'warning', 'danger'].sample %> text-white">
+                      <%= user_initial %>
+                    </div>
+                  </div>
+                  <div class="conversation-content flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h6 class="mb-0"><%= other_user.username %></h6>
+                      <small class="text-muted">
+                        <%= last_message ? time_ago_in_words(last_message.created_at) + " ago" : "New" %>
+                      </small>
+                    </div>
+                    <p class="mb-0 text-truncate small">
+                      <% if last_message %>
+                        <%= truncate(last_message.body, length: 30) %>
+                      <% else %>
+                        <span class="text-muted">No messages yet</span>
+                      <% end %>
+                    </p>
+                    
+                    <% if conversation.unread_messages_for?(current_user) %>
+                      <span class="badge bg-primary rounded-pill unread-count">
+                        <%= conversation.unread_count_for(current_user) %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="list-group-item text-center py-4">
+              <p class="text-muted mb-0">No conversations yet</p>
+              <small>Start a new conversation with another user</small>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="card conversation-placeholder">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-chat-dots" style="font-size: 4rem; color: #ccc;"></i>
+          <h5 class="mt-3">Select a conversation or start a new one</h5>
+          <p class="text-muted">Your messages will appear here</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_tag do %>
+  // Clear unread badge when returning to this page
+  document.addEventListener('turbo:load', function() {
+    const unreadBadge = document.querySelector('#message-badge');
+    if (unreadBadge) {
+      unreadBadge.textContent = '';
+      unreadBadge.classList.add('d-none');
+    }
+  });
+<% end %>

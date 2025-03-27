@@ -5,6 +5,7 @@ class UsersController < ApplicationController
 
   def show
     # Profile page
+    @products = @user.products.includes(:category).order(created_at: :desc)
   end
 
   def new

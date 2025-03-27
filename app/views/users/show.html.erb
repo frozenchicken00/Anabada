@@ -1,4 +1,5 @@
 <div class="container mt-5">
+  <div class="card">
     <div class="card-body">
       <h2 class="card-title">Profile</h2>
       <div class="mb-3">
@@ -13,9 +14,52 @@
         <strong>Account Type:</strong>
         <%= @user.admin? ? "Administrator" : "User" %>
       </div>
-      <%if current_user == @user%>
-        <%= link_to 'Edit Profile', edit_user_path(@user), class: 'btn btn-primary' %>
-        <%= link_to 'Back', root_path, class: 'btn btn-secondary' %>
-      <%end%>
+      
+      <div class="d-flex flex-wrap gap-2">
+        <% if current_user == @user %>
+          <%= link_to 'Edit Profile', edit_user_path(@user), class: 'btn btn-primary' %>
+          <%= link_to 'Back', root_path, class: 'btn btn-secondary' %>
+          <%= button_to "Sign Out", sign_out_path, 
+            method: :delete, 
+            class: "btn btn-outline-danger",
+            form: { class: "d-inline" }
+           %>
+        <% elsif current_user %>
+          <%= link_to conversations_path(receiver_id: @user.id), method: :post, class: 'btn btn-primary chat-btn' do %>
+            <i class="bi bi-chat-dots me-1"></i> Start Chat
+          <% end %>
+          <%= link_to 'Back', root_path, class: 'btn btn-secondary' %>
+        <% else %>
+          <%= link_to 'Back', root_path, class: 'btn btn-secondary' %>
+        <% end %>
+      </div>
     </div>
+  </div>
+  
+  <% if @user.products.any? %>
+    <div class="mt-4">
+      <h3>Products by <%= @user.username %></h3>
+      <div class="row mt-3">
+        <% @user.products.each do |product| %>
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+              <% if product.pictures.attached? %>
+                <%= image_tag product.pictures.first, class: 'card-img-top product-img', alt: product.name %>
+              <% else %>
+                <%= image_tag 'https://via.placeholder.com/300x200', class: 'card-img-top product-img', alt: 'Placeholder' %>
+              <% end %>
+              <div class="card-body">
+                <h5 class="card-title"><%= product.name %></h5>
+                <p class="card-text text-muted"><%= truncate(product.description, length: 100) %></p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="h5 mb-0">$<%= product.price %></span>
+                  <%= link_to "View Details", product_path(product), class: "btn btn-outline-primary" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 </div>

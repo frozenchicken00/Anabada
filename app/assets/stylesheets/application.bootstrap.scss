@@ -113,3 +113,138 @@ nav[data-border="true"] {
         border-color: #86b7fe;
     }
 }
+
+// Custom comment system styles
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.avatar-xs {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.comment-card {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1.5rem;
+}
+
+.comment-card:last-child {
+  border-bottom: none;
+}
+
+.formatting-tools .btn {
+  padding: 0.25rem 0.5rem;
+  color: #6c757d;
+}
+
+.formatting-tools .btn:hover {
+  color: #212529;
+}
+
+.comment-actions .btn,
+.reply-actions .btn,
+.nested-reply-actions .btn {
+  padding: 0.25rem 0.5rem;
+  color: #6c757d;
+}
+
+.comment-actions .btn:hover,
+.reply-actions .btn:hover,
+.nested-reply-actions .btn:hover {
+  color: #212529;
+}
+
+.replies-container,
+.nested-replies-container {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+// Collapsible content styles
+.when-collapsed {
+  display: inline-block;
+}
+
+.when-not-collapsed {
+  display: none;
+}
+
+.collapsed .when-collapsed {
+  display: inline-block;
+}
+
+.collapsed .when-not-collapsed {
+  display: none;
+}
+
+.btn-link:not(.collapsed) .when-collapsed {
+  display: none;
+}
+
+.btn-link:not(.collapsed) .when-not-collapsed {
+  display: inline-block;
+}
+
+// Override Bootstrap's default dropdown styles
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 0;
+}
+
+// Fix for dropdown positioning
+.dropdown {
+  position: relative;
+}
+
+// Additional dropdown fixes for Popper.js
+.dropdown-menu {
+  margin-top: 0.125rem;
+  z-index: 1000;
+}
+
+.dropdown-menu-end {
+  right: 0;
+  left: auto !important;
+}
+
+// Show the dropdown on hover for larger screens
+@media (min-width: 768px) {
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+}
+
+// Fix for dropdown toggle click behavior
+[data-bs-toggle="dropdown"] {
+  cursor: pointer;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1.25rem;
+}
+
+.dropdown-item:active {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.dropdown-item.text-danger:active {
+  background-color: #f8d7da;
+  color: #dc3545;
+}

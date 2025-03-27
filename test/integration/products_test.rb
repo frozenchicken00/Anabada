@@ -94,7 +94,7 @@ class ProductsTest < ActionDispatch::IntegrationTest
     # Leave a comment
     assert_difference("Comment.count", 1) do
       visit product_path(product)
-      fill_in "Content", with: "Test comment"
+      fill_in "Add comment...", with: "Test comment"
       click_button "Submit"
     end
 
@@ -117,7 +117,7 @@ class ProductsTest < ActionDispatch::IntegrationTest
     # Reply to comment
     assert_difference("Comment.count", 1) do
       click_on "Reply"
-      fill_in "Content", with: "Test reply"
+      fill_in "Write a reply...", with: "Test reply"
       click_button "Submit"
     end
 

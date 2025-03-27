@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   root "home#index"
 
+  # User routes
   resources :users, only: [ :show, :edit, :update, :destroy ] do
     member do
       patch "update_password"  # Optional: separate route for password updates
@@ -19,6 +20,16 @@ Rails.application.routes.draw do
       member do
         post "helpful_vote"
         get "helpful_vote"
+      end
+    end
+  end
+
+  # Messaging routes
+  resources :conversations, only: [ :index, :show, :create ] do
+    resources :messages, only: [ :create ] do
+      collection do
+        post :create_ajax
+        post :mark_as_read
       end
     end
   end
@@ -42,6 +53,6 @@ Rails.application.routes.draw do
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Mount ActionCable server
+  mount ActionCable.server => "/cable"
 end

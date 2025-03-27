@@ -1,0 +1,13 @@
+<% if user_signed_in? %>
+  <%= link_to conversations_path, class: "nav-link position-relative" do %>
+    <i class="bi bi-chat-dots"></i>
+    <span class="mx-1">Messages</span>
+    <% if current_user.has_unread_messages? %>
+      <span class="position-absolute translate-middle badge rounded-pill bg-danger" 
+            style="top: 5px; right: -5px;">
+        <%= current_user.unread_messages_count > 9 ? "9+" : current_user.unread_messages_count %>
+        <span class="visually-hidden">unread messages</span>
+      </span>
+    <% end %>
+  <% end %>
+<% end %> 
