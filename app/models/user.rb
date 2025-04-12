@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
+  attr_accessor :remember_token # Add virtual attribute
+
   has_many :products, dependent: :destroy
   has_many :comments, dependent: :nullify
   has_many :votes, dependent: :destroy
@@ -12,6 +14,11 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true
   validates :email, format: { with: /@/, message: "should look like an email address" }, uniqueness: true, allow_blank: true
 
+  # Generates a new random token
+  def self.new_token
+    SecureRandom.urlsafe_base64
+  end
+
   def self.new_from_hash(user_hash)
     user = User.new user_hash
     user.password_digest = 0
@@ -20,6 +27,25 @@ class User < ApplicationRecord
 
   def has_password?
     self.password_digest.nil? || self.password_digest != "0"
+  end
+
+  # Remembers a user in the database for use in persistent sessions.
+  def remember
+    self.remember_token = User.new_token
+    update_attribute(:remember_digest, BCrypt::Password.create(remember_token))
+  end
+
+  # Returns true if the given token matches the digest.
+  # Generalizing for different types of digests (e.g., activation, reset)
+  def authenticated?(attribute, token)
+    digest = send("#{attribute}_digest")
+    return false if digest.nil?
+    BCrypt::Password.new(digest).is_password?(token)
+  end
+
+  # Forgets a user (clears remember digest).
+  def forget
+    update_attribute(:remember_digest, nil)
   end
 
   # Get all conversations this user is involved in

@@ -1,6 +1,6 @@
 <div class="d-flex align-items-center py-4" style="min-height: 100vh;">
   <main class="form-signin w-100 m-auto">
-    <%= form_with(url: sessions_path, local: true) do |form| %>
+    <%= form_with(url: sessions_path, scope: :session, local: true) do |form| %>
       <h1 class="h3 mb-3 fw-normal text-center">Please sign in</h1>
 
       <div class="form-floating mb-3">

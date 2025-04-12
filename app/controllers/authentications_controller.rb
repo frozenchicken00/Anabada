@@ -2,12 +2,12 @@ class AuthenticationsController < ApplicationController
   def create
     @user = User.where(uid: user_hash[:uid], provider: user_hash[:provider]).first
     if @user
-      login(@user)
+      log_in @user
       redirect_to root_path, notice: "Signed in successfully"
     else
       @user = User.new_from_hash(user_hash)
       if @user.save
-        login(@user)
+        log_in @user
         redirect_to root_path, notice: "Signed up successfully"
       else
         session[:user_hash] = user_hash
