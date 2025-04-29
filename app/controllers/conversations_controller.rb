@@ -1,6 +1,6 @@
 class ConversationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_conversation, only: [ :show ]
+  before_action :set_conversation, only: [ :show, :destroy ] # Add :destroy
 
   def index
     # Get all conversations involving the current user
@@ -47,6 +47,17 @@ class ConversationsController < ApplicationController
 
     # Redirect to the conversation
     redirect_to conversation_path(conversation)
+  end
+
+  def destroy
+    # Make sure all messages are deleted first
+    @conversation.messages.destroy_all
+
+    if @conversation.destroy
+      redirect_to conversations_path, notice: "Conversation deleted successfully."
+    else
+      redirect_to @conversation, alert: "Unable to delete conversation."
+    end
   end
 
   private

@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   end
 
   # Messaging routes
-  resources :conversations, only: [ :index, :show, :create ] do
+  resources :conversations, only: [ :index, :show, :create, :destroy ] do
     resources :messages, only: [ :create ] do
       collection do
         post :create_ajax

@@ -30,13 +30,13 @@ export default function createConversationChannel(conversationId) {
       },
 
       received(data) {
-        console.log("Received message:", data)
-        
+        console.log("Received targeted message:", data) // Updated log message
+
         if (data.message) {
           // Add message to conversation
           const messages = document.getElementById('messages');
           if (!messages) return;
-          
+
           const currentDate = new Date(data.message.created_at).toDateString();
           const lastDateSeparator = messages.querySelector('.date-separator:last-of-type span');
           const lastDateString = lastDateSeparator ? lastDateSeparator.textContent.trim() : '';

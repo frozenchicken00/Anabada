@@ -3,6 +3,7 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import "@popperjs/core" // Explicitly import Popper.js first
 import * as bootstrap from "bootstrap"
+import "channels" // Import Action Cable channels
 
 // Function to manually initialize a specific dropdown
 function initializeSpecificDropdown(dropdownElement) {
@@ -102,5 +103,3 @@ document.addEventListener('turbo:load', () => {
     window.addEventListener('scroll', updateNavbarBorder);
   }
 });
-
-// app/javascript/packs/application.jsimport "./channels"

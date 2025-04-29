@@ -9,12 +9,16 @@ class SessionsController < ApplicationController
     if user && user.authenticate(params[:session][:password])
       puts "PASSWORD: AUTHENTICATED" # Debug output to confirm password authentication
       log_in user
+      logger.debug "[SessionsController#create] After log_in: session[:user_id] = #{session[:user_id]}"
+      logger.debug "[SessionsController#create] After log_in: cookies.signed[:user_id] = #{cookies.signed[:user_id]}"
       puts "SESSION USER_ID: #{session[:user_id]}" # Debug output to check if session is set
       if params[:session][:remember_me] == "1"
         remember(user)
+        logger.debug "[SessionsController#create] After remember: cookies.signed[:user_id] = #{cookies.signed[:user_id]}"
         puts "REMEMBER ME: Enabled" # Debug output for remember me
       else
         forget(user)
+        logger.debug "[SessionsController#create] After forget: cookies.signed[:user_id] = #{cookies.signed[:user_id]}"
         puts "REMEMBER ME: Disabled" # Debug output for remember me
       end
       redirect_to root_path, notice: "Signed in successfully."
