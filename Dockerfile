@@ -25,6 +25,10 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
+ARG RAILS_MASTER_KEY
+ENV RAILS_MASTER_KEY=$RAILS_MASTER_KEY
+ENV RAILS_ENV=production
+
 # Install packages needed to build gems and node modules
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev node-gyp pkg-config python-is-python3 && \
@@ -51,6 +55,9 @@ RUN yarn install --frozen-lockfile
 
 # Copy application code
 COPY . .
+
+# Include encrypted credentials
+COPY config/credentials.yml.enc config/credentials.yml.enc
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
