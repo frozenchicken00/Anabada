@@ -24,6 +24,7 @@ services:
 
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
+      DATABASE_URL: postgresql://postgres:qbeFApKOcicaMSQLlzksasGeLlwGwfWE@postgres.railway.internal:5432/railway
 
   selenium:
     image: selenium/standalone-chromium
