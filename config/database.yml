@@ -85,7 +85,10 @@ test:
 #
 production:
   <<: *default
-  # database: final_project_frozenchicken00_production
-  # username: final_project_frozenchicken00
-  # password: <%= ENV["FINAL_PROJECT_FROZENCHICKEN00_DATABASE_PASSWORD"] %>
   url: <%= ENV["DATABASE_URL"] %>
+  host: postgres.railway.internal
+  port: 5432
+  database: railway
+  username: postgres
+  password: qbeFApKOcicaMSQLlzksasGeLlwGwfWE
+  socket: false
