@@ -42,12 +42,18 @@ class ProductsController < ApplicationController
     @product = current_user.products.build(product_params)
 
     respond_to do |format|
-      if @product.save
-        format.html { redirect_to @product, notice: "Product was successfully created." }
-        format.json { render :show, status: :created, location: @product }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
+      begin
+        if @product.save
+          format.html { redirect_to @product, notice: "Product was successfully created." }
+          format.json { render :show, status: :created, location: @product }
+        else
+          format.html { render :new, status: :unprocessable_entity }
+          format.json { render json: @product.errors, status: :unprocessable_entity }
+        end
+      rescue => e
+        Rails.logger.error("ERROR: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}")
+        format.html { redirect_to new_product_path, alert: "Error creating product. Please try again." }
+        format.json { render json: { error: e.message }, status: :internal_server_error }
       end
     end
   end
