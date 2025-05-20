@@ -1,3 +1,4 @@
+# Only load if Searchkick is defined
 if defined?(Searchkick)
   if Rails.env.production?
     # Completely disable Searchkick in production
@@ -25,14 +26,22 @@ if defined?(Searchkick)
       end
     end
 
-    # 4. Only prepend if Callbacks module exists
-    if Searchkick.const_defined?(:Callbacks)
-      module SearchkickCallbacksDisabler
-        def reindex(method_name = nil, options = {})
-          # Do nothing
+    # 4. Safely handle Callbacks module - DON'T access Searchkick::Callbacks directly
+    begin
+      if Searchkick.const_defined?(:Callbacks)
+        module SearchkickCallbacksDisabler
+          def reindex(method_name = nil, options = {})
+            # Do nothing
+          end
         end
+
+        # Use safer approach with const_get instead of direct access
+        callbacks_class = Searchkick.const_get(:Callbacks)
+        callbacks_class.prepend SearchkickCallbacksDisabler
       end
-      Searchkick::Callbacks.prepend SearchkickCallbacksDisabler
+    rescue => e
+      # Log error but don't fail initialization
+      Rails.logger.warn "Failed to disable Searchkick callbacks: #{e.message}"
     end
 
     # 5. Reopen the Product class to add a direct search method
